@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Editable</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <div class="main">
+        <div class="left">
+            <div id="editor" class="editor" contenteditable="true"></div>
+        </div>
+        <div class="right">
+            <input type="file" id="fileinput" style="display: none;">
+            <button onclick="insertImage()" >Add Image</button>
+            <button onclick="submit()" >Submit</button>
+        </div>
+    </div>
+    <script src="index.js"></script>
+</body>
+</html>
