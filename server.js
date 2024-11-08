@@ -5,6 +5,10 @@ const cors = require('cors')
 const multer = require('multer')
 const path = require('path')
 const admin = require('firebase-admin')
+const { fbStorage } = require('./firebaseConfig')
+const { getStorage, ref, getDownloadURL, child } = require('firebase/storage')
+// import { storage } from "./firebaseConfig"
+// import { getStorage, ref, getDownloadURL, child } from 'firebase/storage'
 
 const app = express()
 
@@ -41,26 +45,51 @@ admin.initializeApp({
 })
 
 const bucket = admin.storage().bucket()
-
+let myImages = []
 app.get('/getNotes', (req, res) => {
     const query = "SELECT text.text_id, text_content, imgId FROM text INNER JOIN imgs ON text.text_id = imgs.text_id"
-    connection.query(query, (err, results) => {
+    connection.query(query, async (err, results) => {
         if(err) {
             return console.log(err)
         }
-        console.log(results)
-        res.json(results)
-    })
+        // res.json({results : results, imgs : myImages})
+
+                myImages = await Promise.all(
+                    results.map(async (item) => {
+                        const storageRef = ref(fbStorage, `images/${item.imgId}`)
+
+                        try {
+                            const url = await getDownloadURL(storageRef);
+                            // console.log(item)
+                            return url; 
+                        } catch (error) {
+                            console.log(error);
+                            return null;
+                        }
+                    })
+                )
+                // console.log(results)
+                // console.log(myImages)
+                res.json({results : results, imgs : myImages})
+                myImages = []
+                return
+        
+
+        
+        // console.log(myImages)
+        
+        })
 })
 
 app.post('/upload-image', upload.single('image'),(req, res) => {
+    // console.log(req.file.path)
     const filePath = req.file.filename
 
     const query = "INSERT INTO text (text_content) VALUES (?)"
     const values = [req.body.text]
 
     const filePath1 = path.join(path.resolve(__dirname, '.'), req.file.path)
-    
+    // console.log(filePath)
     connection.query(query, values, async (err) => {
         if(err) {
            return console.log(err)
@@ -91,6 +120,7 @@ app.post('/upload-image', upload.single('image'),(req, res) => {
                         return console.log(err)
                     }
                 }
+                return res.json({success : "success"})
             })
             
         })

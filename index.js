@@ -5,16 +5,43 @@ function insertImage() {
 }
 
 const existing = document.getElementById('saved-work')
-
+let length = 0
+let maxLength
+let data1 = []
 function getNotes() {
     fetch('http://localhost:3000/getNotes', {
         method : 'GET',
     }).then(response => response.json())
     .then(data => {
-        existing.innerHTML = data[0].text_content
+        console.log(data)
+        data1 = data
+        maxLength = data.results.length - 1
+        // console.log(length)
+        existing.innerHTML = data.results[length].text_content
+        existing.querySelector('img').src = data.imgs[length]
     })
 }
 getNotes()
+
+const prev = () => {
+    if(length < 1) {
+        length = maxLength
+    } else {
+        length--
+    }
+    existing.innerHTML = data1.results[length].text_content
+    existing.querySelector('img').src = data1.imgs[length]
+}
+
+const next = () => {
+    if(length == maxLength) {
+        length = 0
+    } else {
+        length++
+    }
+    existing.innerHTML = data1.results[length].text_content
+    existing.querySelector('img').src = data1.imgs[length]
+}
 
 let file
 document.getElementById("fileinput").addEventListener('change', (event) => {
@@ -27,11 +54,8 @@ document.getElementById("fileinput").addEventListener('change', (event) => {
             const img = document.createElement('img');
             
             img.src = e.target.result;
-            // console.log(file)
 
             const selection = window.getSelection();
-
-            // console.log(selection.rangeCount)
 
             if(selection.rangeCount > 0) {
                 const range = selection.getRangeAt(0)
@@ -44,7 +68,6 @@ document.getElementById("fileinput").addEventListener('change', (event) => {
                 selection.removeAllRanges();
                 selection.addRange(range);
 
-                // console.log(img.src);
             }
         }
         reader.readAsDataURL(file);
@@ -70,14 +93,11 @@ function submit() {
 
     fetch('http://localhost:3000/upload-image', {
         method : 'POST',
-        // headers : { 'Content-Type' : 'application/json' },
         body: formData
     })
-    // .then(response => response.json())   
-    // .then(data => {
-    //     if(data.url) {
-    //         console.log("Image ", data.url, " uploaded")
-    //     }
-    // }).catch(err => console.log(err))
-    getNotes()
+    .then(response).then(data => {
+        console.log(data)
+    }) 
+
+    
 }
