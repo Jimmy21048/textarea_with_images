@@ -4,6 +4,18 @@ function insertImage() {
     document.getElementById("fileinput").click();
 }
 
+const existing = document.getElementById('saved-work')
+
+function getNotes() {
+    fetch('http://localhost:3000/getNotes', {
+        method : 'GET',
+    }).then(response => response.json())
+    .then(data => {
+        existing.innerHTML = data[0].text_content
+    })
+}
+getNotes()
+
 let file
 document.getElementById("fileinput").addEventListener('change', (event) => {
     file = event.target.files[0];
@@ -38,13 +50,15 @@ document.getElementById("fileinput").addEventListener('change', (event) => {
         reader.readAsDataURL(file);
     }
     event.target.value = "";
+    console.log(file)
 
 })
 
 const editor = document.getElementById("editor");
 
 function submit() {
-    editor.querySelector('img').src = ""
+    let randomNumber = Math.floor(Math.random() * (1000 - 1 +1) + 1)
+    editor.querySelector('img').src = `${randomNumber}`
     const data = { d : editor.innerHTML};
 
     // console.log(data.d)
@@ -65,4 +79,5 @@ function submit() {
     //         console.log("Image ", data.url, " uploaded")
     //     }
     // }).catch(err => console.log(err))
+    getNotes()
 }
